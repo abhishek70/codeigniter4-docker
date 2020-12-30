@@ -1,0 +1,40 @@
+version: '3'
+services:
+    db:
+        image: mysql/mysql-server:5.7
+        container_name: ci-db
+        networks:
+            - ci-4-network
+#        volumes:
+#            - /db_data:/var/lib/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+            MYSQL_DATABASE: ci4
+            MYSQL_USER: root
+            MYSQL_PASSWORD: root
+        expose:
+            - "3306"
+        ports:
+            - "3306:3306"
+    app:
+        build:
+            context: .
+            args:
+                MODE: 'development'
+        image: php-ci-4:latest
+        container_name: ci-app
+        networks:
+            - ci-4-network
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - db
+        restart: always
+        ports:
+            - "8080:80"
+        environment:
+            MYSQL_HOST: db
+            CI_ENVIRONMENT: development
+networks:
+    ci-4-network:
